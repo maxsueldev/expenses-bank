@@ -6,7 +6,20 @@
   padding: 0.7rem 2rem;
 }
 
-.header a {
+.header nav {
+  display: flex;
+  gap: 1.6rem;
+}
+
+.header nav a {
+  cursor: pointer;
+}
+
+.header nav a.active {
+  color: green;
+}
+
+.header nav a.logout {
   font-weight: bold;
   color: blue;
 }

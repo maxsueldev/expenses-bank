@@ -1,0 +1,35 @@
+.main {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 5rem;
+  padding: 2rem 4rem;
+}
+
+aside {
+  width: 120px;
+}
+
+aside .photoImage {
+  width: 120px;
+  border-radius: 8px;
+  margin-bottom: 0.6rem;
+}
+
+aside p {
+  text-align: center;
+}
+
+.transactions p:first-child {
+  font-size: 1.2rem;
+  text-align: center;
+  margin: 1rem 0;
+}
+
+.transactions .saldo {
+  text-align: right;
+  font-size: 1.3rem;
+  color: green;
+  margin-top: 2rem;
+}

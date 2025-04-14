@@ -10,6 +10,7 @@ const Login = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [isSigningIn, setIsSigningIn] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>("");
 
   const { userLoggedIn, loading } = useContext(AuthContext);
 
@@ -18,7 +19,13 @@ const Login = () => {
 
     if (!isSigningIn) {
       setIsSigningIn(true);
+    }
+
+    try {
       await onSignIn(email, password);
+    } catch (err) {
+      setErrorMessage(`Erro ao tentar acessar o sistema: ${err}`);
+      setIsSigningIn(false);
     }
   };
 
@@ -26,8 +33,8 @@ const Login = () => {
     if (!isSigningIn) {
       setIsSigningIn(true);
       onSignInWithGoogle().catch((err) => {
+        setErrorMessage(`Erro ao tentar acessar o sistema: ${err}`);
         setIsSigningIn(false);
-        console.log(err);
       });
     }
   };
@@ -88,6 +95,7 @@ const Login = () => {
               Continue com Google
             </button>
           </form>
+          <p className="errorMessage">{errorMessage}</p>
         </div>
       </main>
     </div>

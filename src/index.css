@@ -9,6 +9,15 @@ a {
   color: #000000;
 }
 
+li {
+  list-style: none;
+}
+
 body {
   background-color: #f7fafc;
+}
+
+.errorMessage {
+  color: red;
+  margin-top: 10px;
 }
