@@ -1,0 +1,17 @@
+.cardItem {
+  border: 2px solid #808080;
+  padding: 2rem;
+  font-size: 1.2rem;
+}
+
+.description .category {
+  background-color: yellow;
+  padding: 0.1rem 0.5rem;
+  margin-left: 1rem;
+}
+
+.cardItem .details {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+}

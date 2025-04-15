@@ -1,0 +1,20 @@
+.main {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 5rem;
+  padding: 2rem 4rem;
+}
+
+.extract {
+  flex: 1;
+}
+
+.withoutTransactions {
+  color: red;
+}
+
+.extract ul {
+  padding-bottom: 2rem;
+}

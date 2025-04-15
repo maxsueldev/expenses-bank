@@ -1,5 +1,16 @@
-import { createContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import ITransaction from "../interface/ITransaction";
+import {
+  collection,
+  getDocs,
+  query,
+  QueryDocumentSnapshot,
+  Timestamp,
+  DocumentData,
+  where,
+} from "firebase/firestore";
+import { db } from "../firebase/firebase";
+import { AuthContext } from "./AuthContext";
 
 interface ITransactionsContextProps {
   transactions: ITransaction[];
@@ -8,72 +19,61 @@ interface ITransactionsContextProps {
   last5Transactions: ITransaction[];
 }
 
-const initialState = [
-  {
-    id: 0,
-    description: "Salário - Abril",
-    value: 2400.0,
-    category: "Salário",
-    date: new Date("2025-04-01"),
-    paymentMethod: "Transferência Bancária",
-    recurrent: true,
-    pay: true,
-    type: "Receita",
-  },
-  {
-    id: 1,
-    description: "Supermercado",
-    value: -250.0,
-    category: "Alimentação",
-    date: new Date("2025-04-10"),
-    paymentMethod: "Cartão de Crédito",
-    recurrent: false,
-    pay: true,
-    type: "Despesa",
-  },
-  {
-    id: 2,
-    description: "Internet",
-    value: -100.0,
-    category: "Serviços",
-    date: new Date("2025-04-05"),
-    paymentMethod: "Débito em conta",
-    recurrent: true,
-    pay: false,
-    type: "Despesa",
-  },
-  {
-    id: 3,
-    description: "Lava-Jato",
-    value: -80.0,
-    category: "Serviços",
-    date: new Date("2025-03-06"),
-    paymentMethod: "Pix",
-    recurrent: false,
-    pay: true,
-    type: "Despesa",
-  },
-  {
-    id: 4,
-    description: "Açaí",
-    value: -18.0,
-    category: "Lanche",
-    date: new Date("2025-04-02"),
-    paymentMethod: "Pix",
-    recurrent: false,
-    pay: true,
-    type: "Despesa",
-  },
-];
-
 const TransactionsContext = createContext<
   ITransactionsContextProps | undefined
 >(undefined);
 TransactionsContext.displayName = "TransactionsContext";
 
 const TransactionsProvider = ({ children }: { children: React.ReactNode }) => {
-  const [transactions, setTransactions] =
-    useState<ITransaction[]>(initialState);
+  const [transactions, setTransactions] = useState<ITransaction[]>([]);
+
+  const { currentUser } = useContext(AuthContext);
+
+  useEffect(() => {
+    const getTransactions = async () => {
+      if (currentUser) {
+        const q = query(
+          collection(db, "transactions"),
+          where("userId", "==", currentUser.uid)
+        );
+
+        const querySnapshot = await getDocs(q);
+
+        type FirestoreTransaction = Omit<ITransaction, "id" | "date"> & {
+          date: Timestamp | string | Date;
+        };
+
+        function parseTransaction(
+          doc: QueryDocumentSnapshot<DocumentData>
+        ): ITransaction {
+          const data = doc.data() as FirestoreTransaction;
+
+          return {
+            id: doc.id,
+            ...data,
+            date:
+              data.date instanceof Timestamp
+                ? data.date.toDate()
+                : data.date instanceof Date
+                ? data.date
+                : new Date(data.date),
+          };
+        }
+
+        const myTransactions = querySnapshot.docs.map(parseTransaction);
+
+        const sortedTransactions = myTransactions.sort(
+          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+        );
+
+        setTransactions(sortedTransactions);
+      } else {
+        setTransactions([]);
+      }
+    };
+
+    getTransactions();
+  }, [currentUser]);
 
   const saldoTotal = transactions.reduce((acc, item) => {
     return acc + item.value;

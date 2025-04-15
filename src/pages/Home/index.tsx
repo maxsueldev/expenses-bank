@@ -5,13 +5,10 @@ import styles from "./Home.module.css";
 import useTransactions from "../../hooks/useTransactions";
 import CardTransaction from "../../components/CardTransaction";
 import Header from "../../components/Header";
+import Sidebar from "../../components/Sidebar";
 
 const Home = () => {
   const { userLoggedIn, currentUser } = useContext(AuthContext);
-  const photoUrl = currentUser?.photoURL
-    ? currentUser.photoURL
-    : "https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png";
-
   const { last5Transactions, saldoTotal } = useTransactions();
 
   if (!userLoggedIn || !currentUser) {
@@ -22,20 +19,13 @@ const Home = () => {
     <>
       <Header />
       <main className={styles.main}>
-        <aside>
-          <img
-            className={styles.photoImage}
-            src={photoUrl}
-            alt="Foto de perfil"
-          />
-          <p>
-            {currentUser?.displayName
-              ? currentUser.displayName
-              : currentUser?.email}
-          </p>
-        </aside>
+        <Sidebar />
         <div className={styles.transactions}>
-          <p>Ultimas transações...</p>
+          {last5Transactions.length ? (
+            <p>Ultimas transações...</p>
+          ) : (
+            <p>Você não possui transações</p>
+          )}
 
           <ul className={styles.lastTransactions}>
             {last5Transactions.map((transaction) => (

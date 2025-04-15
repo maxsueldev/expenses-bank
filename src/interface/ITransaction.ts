@@ -1,5 +1,5 @@
 interface ITransaction {
-  id: number;
+  id?: string;
   description: string;
   value: number;
   category: string;
@@ -8,6 +8,7 @@ interface ITransaction {
   recurrent: boolean;
   pay: boolean;
   type: string;
+  userId: string;
 }
 
 export default ITransaction;

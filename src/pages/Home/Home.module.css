@@ -7,20 +7,6 @@
   padding: 2rem 4rem;
 }
 
-aside {
-  width: 120px;
-}
-
-aside .photoImage {
-  width: 120px;
-  border-radius: 8px;
-  margin-bottom: 0.6rem;
-}
-
-aside p {
-  text-align: center;
-}
-
 .transactions p:first-child {
   font-size: 1.2rem;
   text-align: center;
