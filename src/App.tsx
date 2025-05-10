@@ -5,8 +5,15 @@ import Register from "./pages/Register";
 import Home from "./pages/Home";
 import Extract from "./pages/Extract";
 import NewTransaction from "./pages/NewTransaction";
+import { useEffect } from "react";
+import { app } from "./firebase/firebase";
 
 const App = () => {
+  useEffect(() => {
+    console.log("Firebase App:", app);
+    console.log("API Key:", process.env.REACT_APP_FIREBASE_API_KEY);
+  }, []);
+
   return (
     <BrowserRouter>
       <Routes>
