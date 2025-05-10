@@ -11,6 +11,11 @@
   flex: 1;
 }
 
+.extract h2 {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
 .withoutTransactions {
   color: red;
 }

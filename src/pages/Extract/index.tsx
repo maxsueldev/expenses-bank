@@ -21,6 +21,7 @@ const Extract = () => {
       <main className={styles.main}>
         <Sidebar />
         <section className={styles.extract}>
+          <h2>Extrato</h2>
           {!transactions.length && (
             <p className={styles.withoutTransactions}>
               Você não possui transações
