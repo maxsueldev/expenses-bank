@@ -7,7 +7,7 @@ interface ITransaction {
   paymentMethod: string;
   recurrent: boolean;
   pay: boolean;
-  type: string;
+  type: "Despesa" | "Receita";
   userId: string;
 }
 

@@ -3,6 +3,7 @@ import ITransaction from "../interface/ITransaction";
 import {
   collection,
   getDocs,
+  addDoc,
   query,
   QueryDocumentSnapshot,
   Timestamp,
@@ -17,6 +18,7 @@ interface ITransactionsContextProps {
   setTransactions: React.Dispatch<React.SetStateAction<ITransaction[]>>;
   saldoTotal: number;
   last5Transactions: ITransaction[];
+  createTransaction: (data: FormData) => void;
 }
 
 const TransactionsContext = createContext<
@@ -30,62 +32,101 @@ const TransactionsProvider = ({ children }: { children: React.ReactNode }) => {
   const { currentUser } = useContext(AuthContext);
 
   useEffect(() => {
-    const getTransactions = async () => {
-      if (currentUser) {
-        const q = query(
-          collection(db, "transactions"),
-          where("userId", "==", currentUser.uid)
-        );
+    if (currentUser) {
+      getTransactions(currentUser.uid);
+    } else {
+      setTransactions([]);
+    }
+  }, [currentUser]);
 
-        const querySnapshot = await getDocs(q);
+  const getTransactions = async (userId: string) => {
+    const q = query(
+      collection(db, "transactions"),
+      where("userId", "==", userId)
+    );
 
-        type FirestoreTransaction = Omit<ITransaction, "id" | "date"> & {
-          date: Timestamp | string | Date;
-        };
+    const querySnapshot = await getDocs(q);
 
-        function parseTransaction(
-          doc: QueryDocumentSnapshot<DocumentData>
-        ): ITransaction {
-          const data = doc.data() as FirestoreTransaction;
-
-          return {
-            id: doc.id,
-            ...data,
-            date:
-              data.date instanceof Timestamp
-                ? data.date.toDate()
-                : data.date instanceof Date
-                ? data.date
-                : new Date(data.date),
-          };
-        }
-
-        const myTransactions = querySnapshot.docs.map(parseTransaction);
-
-        const sortedTransactions = myTransactions.sort(
-          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-        );
-
-        setTransactions(sortedTransactions);
-      } else {
-        setTransactions([]);
-      }
+    type FirestoreTransaction = Omit<ITransaction, "id" | "date"> & {
+      date: Timestamp | string | Date;
     };
 
-    getTransactions();
-  }, [currentUser]);
+    function parseTransaction(
+      doc: QueryDocumentSnapshot<DocumentData>
+    ): ITransaction {
+      const data = doc.data() as FirestoreTransaction;
+
+      return {
+        id: doc.id,
+        ...data,
+        date:
+          data.date instanceof Timestamp
+            ? data.date.toDate()
+            : data.date instanceof Date
+            ? data.date
+            : new Date(data.date),
+      };
+    }
+
+    const myTransactions = querySnapshot.docs.map(parseTransaction);
+
+    const sortedTransactions = myTransactions.sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
+
+    setTransactions(sortedTransactions);
+  };
 
   const saldoTotal = transactions.reduce((acc, item) => {
     return acc + item.value;
   }, 0);
 
   const last5Transactions = transactions
-    .slice(-5)
+    .slice(0, 5)
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+  const createTransaction = async (data: FormData) => {
+    if (!currentUser) return;
+
+    const newTransaction: Omit<ITransaction, "id"> = {
+      description: data.get("description") as string,
+      value: Number(data.get("value")),
+      category: data.get("category") as string,
+      date: new Date(data.get("date") as string),
+      paymentMethod: data.get("paymentMethod") as string,
+      recurrent: Boolean(data.get("recurrent")),
+      pay: Boolean(data.get("pay")),
+      type: data.get("type") as "Despesa" | "Receita",
+      userId: currentUser.uid,
+    };
+
+    try {
+      const adjustedValue =
+        newTransaction.type === "Despesa"
+          ? -Math.abs(newTransaction.value)
+          : Math.abs(newTransaction.value);
+
+      await addDoc(collection(db, "transactions"), {
+        ...newTransaction,
+        value: adjustedValue,
+        date: newTransaction.date,
+      });
+
+      await getTransactions(currentUser.uid);
+    } catch (error) {
+      console.error("Erro ao criar transação: ", error);
+    }
+  };
 
   return (
     <TransactionsContext.Provider
-      value={{ transactions, setTransactions, saldoTotal, last5Transactions }}
+      value={{
+        transactions,
+        setTransactions,
+        saldoTotal,
+        last5Transactions,
+        createTransaction,
+      }}
     >
       {children}
     </TransactionsContext.Provider>

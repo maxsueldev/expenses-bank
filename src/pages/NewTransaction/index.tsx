@@ -4,13 +4,25 @@ import { AuthContext } from "../../context/AuthContext";
 import { Navigate } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
 import styles from "./NewTransaction.module.css";
+import useTransactions from "../../hooks/useTransactions";
+import { useNavigate } from "react-router-dom";
 
 const NewTransaction = () => {
   const { userLoggedIn, currentUser } = useContext(AuthContext);
+  const { createTransaction, transactions } = useTransactions();
+
+  const navigate = useNavigate();
 
   if (!userLoggedIn || !currentUser) {
     return <Navigate to={"/"} replace={true} />;
   }
+
+  const onSubmit = (formData: FormData) => {
+    createTransaction(formData);
+    navigate("/");
+  };
+
+  console.log(transactions);
 
   return (
     <>
@@ -20,18 +32,18 @@ const NewTransaction = () => {
         <div className={styles.newTransaction}>
           <h2>Nova transação</h2>
 
-          <form>
+          <form action={onSubmit}>
             <div className={styles.formGroup}>
               <label htmlFor="description">Descrição: </label>
-              <input type="text" id="description" required />
+              <input type="text" name="description" id="description" required />
             </div>
             <div className={styles.formGroup}>
               <label htmlFor="value">Valor: </label>
-              <input type="number" id="value" required />
+              <input type="number" name="value" id="value" required />
             </div>
             <div className={styles.formGroup}>
               <label htmlFor="category">Categoria: </label>
-              <select id="category" required>
+              <select id="category" name="category" required>
                 <option value="" disabled selected>
                   Selecione uma categoria
                 </option>
@@ -43,11 +55,11 @@ const NewTransaction = () => {
             </div>
             <div className={styles.formGroup}>
               <label htmlFor="date">Data da transação: </label>
-              <input type="date" id="date" required />
+              <input type="date" id="date" name="date" required />
             </div>
             <div className={styles.formGroup}>
               <label htmlFor="paymentMethod">Método de pagamento: </label>
-              <select id="paymentMethod" required>
+              <select id="paymentMethod" name="paymentMethod" required>
                 <option value="" disabled selected>
                   Selecione um método de pagamento
                 </option>
@@ -61,15 +73,15 @@ const NewTransaction = () => {
             </div>
             <div className={styles.formGroup}>
               <label htmlFor="recurrent">É recorrente? </label>
-              <input type="checkbox" id="recurrent" />
+              <input type="checkbox" id="recurrent" name="recurrent" />
             </div>
             <div className={styles.formGroup}>
               <label htmlFor="pay">Já foi pago? </label>
-              <input type="checkbox" id="pay" />
+              <input type="checkbox" id="pay" name="pay" />
             </div>
             <div className={styles.formGroup}>
               <label htmlFor="type">Tipo da transação: </label>
-              <select id="type">
+              <select id="type" name="type">
                 <option value="" disabled selected>
                   Selecione o tipo da transação
                 </option>
